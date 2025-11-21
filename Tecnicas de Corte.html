@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Técnicas de Corte y Derribo de Árboles</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "🪚";
+            position: absolute;
+            font-size: 10rem;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            position: relative;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            padding: 18px 25px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tensiones { background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%); }
+        .tecnicas { background: linear-gradient(135deg, #614385 0%, #516395 100%); }
+        .calculos { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .derribo { background: linear-gradient(135deg, #d31027 0%, #ea384d 100%); }
+        .auxiliares { background: linear-gradient(135deg, #ff5e62 0%, #ff9966 100%); }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            padding: 15px;
+            background: #eff0f1;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            margin-top: 18px;
+        }
+        
+        .feature-item:hover {
+            background: #e9ecef;
+            border-left-color: #2a5298;
+            transform: translateX(5px);
+        }
+        
+        .feature-icon {
+            margin-right: 12px;
+            font-size: 1.4rem;
+            color: #2a5298;
+            min-width: 35px;
+            text-align: center;
+            background: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        
+        .element-list {
+            list-style-type: none;
+            margin-top: 10px;
+        }
+        
+        .element-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+            transition: background 0.3s ease;
+        }
+        
+        .element-list li:hover {
+            background: #f8f9fa;
+        }
+        
+        .element-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .element-icon {
+            margin-right: 12px;
+            color: #2a5298;
+            font-size: 1.2rem;
+            margin-top: 3px;
+            min-width: 30px;
+            text-align: center;
+            background: rgba(42, 82, 152, 0.1);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 25px;
+            background: #1e3c72;
+            color: white;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .footer::before {
+            content: "🏢";
+            position: absolute;
+            font-size: 6rem;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .element-details {
+            font-size: 0.95rem;
+            color: #666;
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+        
+        .highlight {
+            background-color: #fffacd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 2px 0;
+        }
+        
+        .numeric-data {
+            color: #e74c3c;
+            font-weight: bold;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: #ffeaa7;
+            border-left: 5px solid #fdcb6e;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 8px;
+            position: relative;
+            padding-left: 60px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .warning-box::before {
+            content: "⚠️";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.8rem;
+        }
+        
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(20px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+        
+        .type-item {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .type-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2c3e50);
+        }
+        
+        .type-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .type-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .card-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 50px 50px 0;
+            border-color: transparent rgba(255,255,255,0.3) transparent transparent;
+            z-index: 1;
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .data-table tr:hover {
+            background: #e9ecef;
+        }
+        
+        .data-table .numeric-cell {
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .type-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-header {
+                font-size: 1.2rem;
+                padding: 15px 20px;
+            }
+            
+            .feature-item {
+                padding: 12px;
+            }
+        }
+        
+        .pulse-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #2ecc71;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        
+        .tension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .tension-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid #3498db;
+        }
+        
+        .tension-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .tension-icon {
+            font-size: 1.5rem;
+            color: #3498db;
+        }
+        
+        .tecnica-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+        }
+        
+        .tecnica-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid #3498db;
+        }
+        
+        .tecnica-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .tecnica-icon {
+            font-size: 1.5rem;
+            color: #3498db;
+        }
+        
+        .pasos-list {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .pasos-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2ecc71;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .calculos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .calculo-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid #3498db;
+        }
+        
+        .calculo-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        
+        .calculo-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .formula-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 2px solid #3498db;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+        
+        .ejemplo-box {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .material-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .material-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid #3498db;
+        }
+        
+        .material-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        
+        .material-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        @media (max-width: 768px) {
+            .tension-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tecnica-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calculos-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .material-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Técnicas de Corte y Derribo de Árboles</h1>
+            <div class="subtitle">Métodos de corte, técnicas de tala, cálculos y uso de elementos auxiliares</div>
+        </header>
+        
+        <div class="grid-container">
+            <!-- Tensiones en la Madera -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header tensiones">
+                    <span>⚡</span> Tensiones en la Madera
+                </div>
+                <div class="card-content">
+                    <div class="feature-item" style="margin-top: 0;">
+                        <div class="feature-icon">⚠️</div>
+                        <div>
+                            <strong>Consideraciones sobre tensiones</strong><br>
+                            En cortes de ramas o troncos dañados, el espadín puede quedar atrapado por las tensiones a las que está sometida la madera. Estas tensiones se generan en función de los apoyos y el propio peso.
+                        </div>
+                    </div>
+                    
+                    <div class="tension-grid">
+                        <div class="tension-item">
+                            <div class="tension-title">
+                                <span class="tension-icon">🔗</span>
+                                <span>Tensión de Tracción</span>
+                            </div>
+                            <div class="element-details">
+                                Esfuerzo al que está sometido un cuerpo al aplicarle dos fuerzas en sentido opuesto que tienden a estirarlo. En zonas de tracción, las fibras de la madera tienden a separarse del espadín al cortar.
+                            </div>
+                        </div>
+                        
+                        <div class="tension-item">
+                            <div class="tension-title">
+                                <span class="tension-icon">📏</span>
+                                <span>Tensión de Compresión</span>
+                            </div>
+                            <div class="element-details">
+                                Esfuerzo al que está sometido un cuerpo por la aplicación de fuerzas en sentido opuesto que tienden a acortarlo. En zonas de compresión, la madera tiende a cerrarse y atrapar el espadín.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🪵</div>
+                        <div>
+                            <strong>Técnica general de trabajo</strong><br>
+                            Siempre que sea posible, trabajaremos con la parte inferior del espadín. De esta manera el cuerpo de la máquina tenderá a acercarse al tronco, haciendo el trabajo menos fatigoso y más seguro.
+                        </div>
+                    </div>
+                    
+                    <div class="tecnica-grid">
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🪵🪵</span>
+                                <span>Tronco Apoyado sobre sus Dos Extremos</span>
+                            </div>
+                            <div class="element-details">
+                                Las fibras superiores están en compresión y las inferiores en tracción. Si cortamos por la parte superior, el tronco atrapará el espadín.
+                            </div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Procedimiento</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Pequeño corte en parte superior (corte de descarga)<br>
+                                    2. Corte ascendente desde la parte inferior<br>
+                                    3. Hacer coincidir con corte superior de descarga
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🪵</span>
+                                <span>Tronco Apoyado sobre un Extremo</span>
+                            </div>
+                            <div class="element-details">
+                                Las fibras superiores están en tracción y las inferiores en compresión. Si cortamos por la parte inferior, el tronco atrapará el espadín.
+                            </div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Procedimiento</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Pequeño corte en parte inferior (corte de descarga)<br>
+                                    2. Corte descendente desde la parte superior<br>
+                                    3. Hacer coincidir con corte inferior de descarga
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🔄</span>
+                                <span>Troncos con Tensiones Laterales</span>
+                            </div>
+                            <div class="element-details">
+                                Tensiones de compresión y tracción generadas por la posición forzada de una rama. Se transfieren fuerzas horizontales laterales, no verticales.
+                            </div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Procedimiento</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Colocarse en zona de compresión<br>
+                                    2. Corte de descarga en zona de compresión<br>
+                                    3. Corte desde zona de tracción hasta coincidir con corte de descarga
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔧</div>
+                        <div>
+                            <strong>Atrapamiento del Espadín</strong><br>
+                            Si el espadín queda atrapado en el corte: apagar la máquina con freno de cadena desactivado, intentar sacarlo sin tirones violentos. Si no sale, abrir el corte con cuñas o palanquetas, evitando movimientos que dañen la máquina.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Técnicas de Trabajo desde el Suelo -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header tecnicas">
+                    <span>🌳</span> Técnicas de Trabajo desde el Suelo
+                </div>
+                <div class="card-content">
+                    <div class="feature-item"style="margin-top: 0;">
+                        <div class="feature-icon">🎯</div>
+                        <div>
+                            <strong>Tala o Apeo de un Árbol</strong><br>
+                            Tras reconocer los daños y determinar la tala, elegir el lugar de derribo. Asegurar la zona evitando el paso de personas. Valorar entorno urbano, obstáculos y condiciones climatológicas (no talar con viento excesivo).
+                        </div>
+                    </div>
+                    
+                    <div class="tecnica-grid">
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🎯</span>
+                                <span>Preparación del Árbol</span>
+                            </div>
+                            <div class="element-details">
+                                • Determinar dirección de caída aprovechando caída natural<br>
+                                • Valorar forma de copa, longitud de tronco, inclinación del terreno<br>
+                                • Comprobar obstáculos en zona de caída (tendidos, casas, vehículos)<br>
+                                • Elegir vía de escape en dirección opuesta a la caída<br>
+                                • Despejar ramas e irregularidades del tronco hasta altura de hombros
+                            </div>
+                        </div>
+                        
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">⚠️</span>
+                                <span>Precauciones durante la Tala</span>
+                            </div>
+                            <div class="element-details">
+                                • No terminar corte de tala con motosierra<br>
+                                • Una vez realizados cortes de debilitamiento, derribar con cuñas, barras, cables o cuerdas<br>
+                                • Cuando el árbol comience a caer, caminar hacia atrás por vía de escape lateral mirando la copa<br>
+                                • Las vías de escape serán laterales traseras a <span class="numeric-data">45 grados</span> opuestas a la dirección de caída del árbol<br>
+                                • En terreno irregular, cuidado con rebote al caer
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔪</div>
+                        <div>
+                            <strong>Tipos de Corte de Tala</strong><br>
+                            Según necesidades del árbol (diámetro del tronco o caída natural) y longitud del espadín, elegir técnica más apropiada.
+                        </div>
+                    </div>
+                    
+                    <div class="tecnica-grid">
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">📐</span>
+                                <span>Corte de Dirección</span>
+                            </div>
+                            <div class="element-details">
+                                Realiza función similar a bisagras de puerta; determina hacia dónde caerá el árbol.
+                            </div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Procedimiento</span>
+                                </div>
+                                <div class="element-details">
+                                    • Corte horizontal en parte inferior<br>
+                                    • Corte oblicuo descendente en parte superior a <span class="numeric-data">45 grados</span><br>
+                                    • Ambos cortes deben encontrarse<br>
+                                    • No sobrepasar <span class="numeric-data">1/4 del diámetro</span> del tronco (sin corteza)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🪵</span>
+                                <span>Corte de Tala</span>
+                            </div>
+                            <div class="element-details">
+                                Determina velocidad de caída y permite corregir dirección.
+                            </div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Procedimiento</span>
+                                </div>
+                                <div class="element-details">
+                                    • Corte horizontal en parte opuesta al corte de dirección<br>
+                                    • Ligeramente por encima de su vértice<br>
+                                    • No debe separar completamente el árbol<br>
+                                    • Dejar listón de madera (charnela) de aproximadamente <span class="numeric-data">10%</span> del diámetro
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tecnica-grid">
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🌀</span>
+                                <span>Técnica de Corte en Abanico</span>
+                            </div>
+                            <div class="element-details">
+                                Se aplica cuando el diámetro del árbol es aproximadamente <span class="numeric-data">el doble</span> que el espadín.
+                            </div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Procedimiento</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Realizar corte de dirección<br>
+                                    2. Introducir punta del espadín lateralmente respetando charnela<br>
+                                    3. Con punta en centro del tronco, girar hacia parte opuesta del corte de dirección<br>
+                                    4. Usar cuñas para ganar grado de desplome y evitar cierre del corte
+                                </div>
+                            </div>
+                            <img src="images/Abanico.png" alt="" style="width: 100%; height: max-content; margin-top: 12px;">
+                        </div>
+                        
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">❤️</span>
+                                <span>Técnica de Pinchazo de Corazón</span>
+                            </div>
+                            <div class="element-details">
+                                Se aplica cuando el diámetro del tronco es <span class="numeric-data">mayor que el doble</span> de la longitud del espadín.
+                            </div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Procedimiento</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Realizar corte direccional dando más ángulo al oblicuo<br>
+                                    2. Introducir punta del espadín <span class="numeric-data">2-3 cm</span> por encima del vértice del corte direccional<br>
+                                    3. Llegar al centro del tronco<br>
+                                    4. Movimiento pivotante de izquierda a derecha para abrir hueco<br>
+                                    5. Posicionar corte de abanico respetando charnela
+                                </div>
+                            </div>
+                            <img src="images/Corazón.png" alt="" style="width: 100%; height: max-content; margin-top: 12px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cálculos para el Derribo -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header calculos">
+                    <span>📊</span> Cálculos para el Derribo
+                </div>
+                <div class="card-content">
+                    <!-- Cálculo de Altura -->
+                    <div class="calculo-item">
+                        <div class="calculo-icon">📏</div>
+                        <div class="calculo-title">Cálculo de Altura - Método con Elementos de Fortuna</div>
+                        <div class="element-details">
+                            Método práctico para medir altura cuando no se dispone de medidor láser.
+                        </div>
+                        
+                        <div class="pasos-list" style="display: grid; grid-template-columns: 1fr 1fr; max-width: 800px;margin: auto;">
+                            <div>
+                            <div class="pasos-title">
+                                <span>🔧</span>
+                                <span>Procedimiento</span>
+                            </div>
+                            <div class="element-details" style="text-align: left;">
+                                1. Conseguir una rama pequeña y recta (A)<br>
+                                2. Colocar verticalmente frente a nosotros estirando el brazo<br>
+                                3. Hacer coincidir visualmente:<br>
+                                &nbsp;&nbsp;&nbsp;- Extremo inferior de la vara con base del árbol<br>
+                                &nbsp;&nbsp;&nbsp;- Parte superior de la vara con copa del árbol<br>
+                                4. Girar la mano a posición horizontal sin mover la vara (B)<br>
+                                5. Marcar el punto donde "cae" la longitud (C)<br>
+                                6. Medir distancia entre la señal y base del árbol (D)
+                            </div>
+                            </div>
+                            <div>
+                                <img src="images/Altura.png" alt="" style="max-width: 70%;">
+                            </div>
+                        </div>
+                        <div class="formula-box">
+                            Altura del árbol = Distancia desde base hasta punto marcado
+                        </div>
+                        
+                        <div class="ejemplo-box">
+                            <strong>Explicación del método:</strong><br>
+                            Este método utiliza principios de geometría básica y triángulos semejantes. La distancia desde el punto marcado hasta la base del árbol corresponde exactamente a la altura del mismo.
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">📏</div>
+                        <div>
+                            <strong>Cálculo del Radio</strong><br>
+                            Para medir el radio de forma precisa podemos calcularlo de dos formas diferentes.
+                        </div>
+                    </div>
+                    
+                    <div class="calculos-container">
+                        <div class="calculo-item">
+                            <div class="calculo-icon">📐</div>
+                            <div class="calculo-title">Método 1: Por Perímetro</div>
+                            <div class="element-details">
+                                Medir con flexómetro el perímetro del tronco a altura de pecho (<span class="numeric-data">1.3 m</span> del suelo)
+                            </div>
+                            <div class="formula-box">
+                                radio = perímetro / (2 × π)
+                            </div>
+                        </div>
+                        
+                        <div class="calculo-item">
+                            <div class="calculo-icon">📏</div>
+                            <div class="calculo-title">Método 2: Por Diámetro</div>
+                            <div class="element-details">
+                                Medir diámetro aproximado con flexómetro (menos preciso pero más rápido)
+                            </div>
+                            <div class="formula-box">
+                                radio = diámetro / 2
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📦</div>
+                        <div>
+                            <strong>Cálculo del Volumen</strong><br>
+                            Una vez calculada la altura del árbol (h) y el radio del tronco (r), podemos calcular el volumen (V).
+                        </div>
+                    </div>
+                    
+                    <div class="calculo-item">
+                        <div class="calculo-icon">🧮</div>
+                        <div class="calculo-title">Fórmula del Volumen</div>
+                        <div class="formula-box">
+                            V = π × r² × h
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">⚖️</div>
+                        <div>
+                            <strong>Cálculo Aproximado de la Masa</strong><br>
+                            La densidad es la relación entre masa y volumen. La madera verde recién cortada tiene alrededor de 50% de humedad.
+                        </div>
+                    </div>
+                    
+                    <div class="calculo-item">
+                        <div class="calculo-icon">⚖️</div>
+                        <div class="calculo-title">Fórmula de la Masa</div>
+                        <div class="formula-box">
+                            masa = densidad × volumen
+                        </div>
+                        <div class="element-details">
+                            <strong>Densidades aproximadas:</strong><br>
+                            • Coníferas (ligeras): <span class="numeric-data">400-550 kg/m³</span><br>
+                            • Encina y roble (pesadas): <span class="numeric-data">800 kg/m³</span>
+                        </div>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <strong>NOTA IMPORTANTE</strong><br>
+                        Para estimar la masa con margen de error suficiente, cada m³ de madera se multiplica por <span class="numeric-data">800 kg</span> (como si fuera encina o roble), ya que el trabajo se realiza con árboles vivos recién dañados y con cierto nivel de humedad (alrededor de un <span class="numeric-data">50%</span>).
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Derribo con Elementos Auxiliares -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header auxiliares">
+                    <span>🏗️</span> Derribo con Elementos Auxiliares
+                </div>
+                <div class="card-content">
+                    <div class="feature-item" style="margin-top: 0;">
+                        <div class="feature-icon">🌪️</div>
+                        <div>
+                            <strong>Situaciones que requieren elementos auxiliares</strong><br>
+                            Generalmente en árboles dañados tras ventanales, tormentas o temporales. Ramas o troncos rotos, colgados, apoyados, desgajados o desplomados en zonas urbanas que suponen riesgo para ciudadanos, vehículos, locales, etc.
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div>
+                            <strong>Cuándo usar medios auxiliares</strong><br>
+                            • Para talar árbol en dirección opuesta a su caída natural<br>
+                            • Cuando el corte de dirección no es suficiente para cambiar la caída natural<br>
+                            • En árboles inestables con tensiones difíciles de identificar
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📋</div>
+                        <div>
+                            <strong>Consideraciones generales</strong><br>
+                            • Siempre que el árbol esté inestable, intentar talar con medios mecánicos desde lugar seguro<br>
+                            • Trabajar desde escala aérea teniendo posición elevada y más segura (precaución con efecto muelle)<br>
+                            • Aliviar tensión suspendiendo parcialmente la carga con ayuda de grúa, vehículo, etc.<br>
+                            • Realizar cortes de forma lenta, progresiva y observando movimientos de la estructura
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🛠️</div>
+                        <div>
+                            <strong>Material que utilizaremos</strong><br>
+                            Diversos elementos auxiliares para el derribo controlado de árboles.
+                        </div>
+                    </div>
+                    
+                    <div class="material-grid">
+                        <div class="material-item">
+                            <div class="material-icon">🪢</div>
+                            <div class="material-title">Tractel</div>
+                            <div class="element-details">
+                                Aparato portátil de fuerza manual para tracción y elevación con cable pasante
+                            </div>
+                        </div>
+                        
+                        <div class="material-item">
+                            <div class="material-icon">⚙️</div>
+                            <div class="material-title">Cabrestante</div>
+                            <div class="element-details">
+                                Dispositivo de gran potencia diseñado para mover carga sobre una superficie horizontal.
+                            </div>
+                        </div>
+                        
+                        <div class="material-item">
+                            <div class="material-icon">🏗️</div>
+                            <div class="material-title">Grúa de gran tonelaje</div>
+                            <div class="element-details">
+                               Camión con aguilón (brazo de grúa) para levantar pesos y desplazarlos.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Situaciones Complejas -->
+                    <div class="feature-item">
+                        <div class="feature-icon">🌪️</div>
+                        <div>
+                            <strong>Situaciones Complejas Más Comunes</strong><br>
+                            Las situaciones más habituales a las que nos enfrentamos en intervenciones:
+                        </div>
+                    </div>
+
+                    <div class="type-grid" style="text-align:center;">
+                        <div class="type-item" style="display: flex;">
+                            <div class="type-title">
+                                Árbol apoyado en fachada
+                            </div>
+                        </div>
+                        <div class="type-item"  style="display: flex; justify-content: center;">
+                            <div class="type-title">
+                                Árbol desarraigado
+                            </div>
+                        </div>
+                        <div class="type-item" style="display: flex;">
+                            <div class="type-title">
+                                Árbol excesivamente desplomado por el viento
+                            </div>
+                        </div>
+                        <div class="type-item" style="display: flex;">
+                            <div class="type-title">
+                                Árbol apoyado en otro árbol
+                            </div>
+                        </div>
+                        <div class="type-item" style="display: flex;">
+                            <div class="type-title">
+                                Árbol partido a la mitad de su fuste y apoyado
+                            </div>
+                        </div>
+                        <div class="type-item" style="display: flex;">
+                            <div class="type-title">
+                                Gran rama de árbol partida
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preparación y Dasometría -->
+                    <div class="feature-item">
+                        <div class="feature-icon">📋</div>
+                        <div>
+                            <strong>Preparación y Evaluación</strong><br>
+                            Tras el reconocimiento previo y determinar la necesidad del derribo:
+                        </div>
+                    </div>
+
+                    <div class="pasos-list">
+                        <div class="pasos-title">
+                            <span>🔒</span>
+                            <span>Procedimiento de Preparación</span>
+                        </div>
+                        <div class="element-details">
+                            • Asegurar la zona mediante cordón de seguridad<br>
+                            • Aislar el peligro<br>
+                            • Revaluar la situación completa:<br>
+                            &nbsp;&nbsp;&nbsp;- Edificios y vehículos cercanos<br>
+                            &nbsp;&nbsp;&nbsp;- Forma de la copa e inclinación del árbol<br>
+                            &nbsp;&nbsp;&nbsp;- Salud del árbol<br>
+                            &nbsp;&nbsp;&nbsp;- Velocidad y dirección del viento
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div>
+                            <strong>Dasometría para Estimación de Peso</strong><br>
+                            Antes de usar medios auxiliares debemos estimar el peso observando altura y diámetro. La dasometría estudia los bosques y aplica métodos estadísticos para su manejo.
+                        </div>
+                    </div>
+
+                    <div class="tecnica-grid">
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">📐</span>
+                                <span>Dendrometría</span>
+                            </div>
+                            <div class="element-details">
+                                Trata de la medida de las dimensiones del árbol como "ente individual", estudio de su forma y determinación de su volumen.
+                            </div>
+                        </div>
+                        
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🌳</span>
+                                <span>Estereometría</span>
+                            </div>
+                            <div class="element-details">
+                                Trata de la masa forestal. Realiza estimaciones métricas y cálculo del volumen (cubicación) de la masa forestal como conjunto de árboles.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <strong>IMPORTANTE: Cálculo del Volumen Completo</strong><br>
+                        Los expertos usan fórmulas complejas (Huber, Smalian, Hohenadl) pero solo calculan el fuste. En nuestro caso necesitamos el volumen completo incluyendo ramas y hojas, ya que son una parte muy pesada del árbol y crucial para elevarlo o moverlo con medios mecánicos.
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">🏘️</div>
+                        <div>
+                            <strong>Árbol Desplomado en Fachada</strong><br>
+                            Situación común en nuestro trabajo. Distinguimos dos tipos: cuando las raíces aún están arraigadas parcialmente al terreno, y cuando el tronco ha partido y está libre.
+                        </div>
+                    </div>
+                    
+                    <div class="pasos-list" style="display: grid; grid-template-columns: 1fr 1fr;">
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                        <div class="pasos-title">
+                            <span>🔧</span>
+                            <span>Procedimiento para Árbol en Fachada</span>
+                        </div>
+                        <div class="element-details" style="font-size: 18px;">
+                            1. En centro del fuste, colocar eslinga o cadena para tirar hacia abajo con cabrestante<br>
+                            2. Redirigir dirección de tiro con ayuda de polea<br>
+                            3. Dar tensión al conjunto y realizar corte en parte inferior del tronco para debilitar madera<br>
+                            4. Una vez debilitada la madera, bombero se retira de zona<br>
+                            a. Accionar cabrestante hasta partir tronco. Queda liberado del tocón en posición de mayor equilibrio<br>
+                            b. Peso reducido de forma considerable<br>
+                            c. Separar árbol de fachada arrastrando, volteando, traccionando de copa o elevando con grúa
+                        </div>
+                        </div>
+                        <div style="display:flex ; justify-content: center; align-items: center;">
+                            <img src="images/Fachada.png" alt="" style="max-width: 50%; max-height: max-content;">
+                        </div>
+                    </div>
+                    
+                    <!-- Talado con Apoyo de Grúa - Revisado -->
+                    <div class="feature-item">
+                        <div class="feature-icon">🏗️</div>
+                        <div>
+                            <strong>Talado con Apoyo de Grúa</strong><br>
+                            Los trabajos con grúa permiten dominar árboles de forma controlada en lugares reducidos donde no es posible realizar una tala común, como calles estrechas o con presencia de otros árboles cercanos.
+                        </div>
+                    </div>
+
+                    <div class="tecnica-grid">
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🎯</span>
+                                <span>Preparación y Consideraciones</span>
+                            </div>
+                            <div class="element-details">
+                                • Asegurar el árbol a izar antes del corte de separación<br>
+                                • Considerar vertical de la pluma respecto a inclinación del árbol<br>
+                                • Estimar peso de la carga antes de la maniobra<br>
+                                • Verificar que no hay personas en zona de trabajo<br>
+                                • Todos los movimientos deben estar en campo visual del operador
+                            </div>
+                        </div>
+                        
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">⚖️</span>
+                                <span>Procedimiento de Izado</span>
+                            </div>
+                            <div class="element-details">
+                                • Levantar cargas verticalmente por encima de su centro de gravedad<br>
+                                • Colocar eslinga en vertical y por encima del centro de gravedad<br>
+                                • Realizar corte total del fuste<br>
+                                • Ayudarse con cuñas para evitar que fuste asiente sobre espadín
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pasos-list" style="display: grid; grid-template-columns: 1fr 1fr;">
+                        <div>
+                        <div class="pasos-title">
+                            <span>🔧</span>
+                            <span>Procedimiento Detallado con Grúa</span>
+                        </div>
+                        <div class="element-details">
+                            <strong>Tramo Superior:</strong><br>
+                            • Colocar eslinga que sujetará y permitirá manipular la carga<br>
+                            • Atado en vertical y por encima del centro de gravedad<br><br>
+                            
+                            <strong>Tramo Inferior:</strong><br>
+                            • Colocar tiro (<span class="numeric-data">1,20 a 1,50 m</span> de la base) por encima del corte de tala<br>
+                            • Reenvío situado debajo del corte de tala<br>
+                            • Usar eslabón y eslinga para el reenvío<br>
+                            • Evitar desplazamiento de carga al separarse fuste y tocón<br><br>
+                            
+                            <strong>Separación del Fuste:</strong><br>
+                            • Verificar que la eslinga tenga mínima tensión (sin combas)<br>
+                            • Realizar corte total del fuste<br>
+                            • Motoserrista se separa e indica fin de maniobra al operador<br><br>
+                            
+                            <strong>Movilización:</strong><br>
+                            • Operador levanta carga coordinado con bombero del reenvío inferior<br>
+                            • Depositar en suelo para desramado y tronzado
+                        </div>
+                        </div>
+                        <div style="display:flex ; align-items: center;">
+                            <img src="images/Grúa.png" alt="" style="max-width: 60%; max-height: max-content;">
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <strong>ADVERTENCIAS DE SEGURIDAD CON GRÚA</strong><br>
+                        • NUNCA levantar con grúa carga que no esté totalmente libre<br>
+                        • El corte debe estar COMPLETAMENTE realizado antes de izar<br>
+                        • No derribar árbol hacia zona donde haya otro en que se pueda apoyar o enredar<br>
+                        • No talar árbol sobre el que ya hay otro árbol apoyado<br>
+                        • Nunca trabajar en zona de peligro correspondiente a árbol apoyado<br>
+                        • Verificar asentamiento de estabilizadores en terreno firme
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">⚠️</div>
+                        <div>
+                            <strong>¿Por Qué Ocurren los Accidentes con Grúas?</strong><br>
+                            • No traccionar carga verticalmente por encima de su centro de gravedad<br>
+                            • Exceder capacidades de carga de la grúa<br>
+                            • Mal asiento de apoyos y estabilizadores<br>
+                            • Terreno no nivelado o de firme blando<br>
+                            • Falta de comunicación con operador ante carga distante y no visible
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desrame de un Árbol -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header" style="background: linear-gradient(135deg, #1d976c 0%, #93f9b9 100%);">
+                    <span>🌿</span> Desrame de un Árbol
+                </div>
+                <div class="card-content">
+                    <div class="feature-item" style="margin-top: 0;">
+                        <div class="feature-icon">⚠️</div>
+                        <div>
+                            <strong>Riesgos durante el desrame</strong><br>
+                            En las operaciones de desrame se ubica la mayor concentración de accidentes. Las ramas dificultan nuestros movimientos y visibilidad durante los trabajos con la motosierra.
+                        </div>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <strong>PRECAUCIONES IMPORTANTES</strong><br>
+                        • Complicada observación de apoyos y valoración de tensiones<br>
+                        • Posibilidad de corte con punta del espadín y sufrir retroceso violento<br>
+                        • Difíciles posturas de trabajo que acercan el espadín al cuerpo<br>
+                        • Descoordinación por ruido de motosierra y falta de comunicación
+                    </div>
+                    
+                    <div class="tecnica-grid">
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🔍</span>
+                                <span>Preparación del Área</span>
+                            </div>
+                            <div class="element-details">
+                                • Despejar zona de corte para mejorar visibilidad<br>
+                                • Identificar apoyos y tensiones antes de empezar<br>
+                                • Trabajar de forma tranquila, segura y coordinada
+                            </div>
+                        </div>
+                        
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">🛡️</span>
+                                <span>Técnicas de Seguridad</span>
+                            </div>
+                            <div class="element-details">
+                                • Trabajar con motosierra cerca del cuerpo<br>
+                                • Avanzar en zig zag de base a copa cortando ramas que no apoyan<br>
+                                • Progresar dejando la carcasa sobre el tronco para liberar peso<br>
+                                • Colocar tronco a nuestra derecha como protección
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📏</div>
+                        <div>
+                            <strong>Procedimiento para Ramas Grandes</strong><br>
+                            Las ramas grandes se cortan en etapas (se tercian), empezando desde el extremo más alejado y avanzando hacia el tronco.
+                        </div>
+                    </div>
+                    
+                    <div class="pasos-list">
+                        <div class="pasos-title">
+                            <span>🔧</span>
+                            <span>Posiciones Prohibidas</span>
+                        </div>
+                        <div class="element-details">
+                            • NO desramar con tronco entre las piernas<br>
+                            • NO estar sobre la rama durante el corte<br>
+                            • NO colocarse en horquilla de dos ramas<br>
+                            • Verificar que árbol está suelto de base<br>
+                            • Altura de corte no debe superar los hombros
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🚶</div>
+                        <div>
+                            <strong>Movimientos y Posiciones</strong><br>
+                            Al desplazarnos a otra posición: activar freno de cadena y descansar máquina en el tronco. Buscar posición que dure todo el corte.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tronzado de un Árbol -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header" style="background: linear-gradient(135deg, #8B4513 0%, #CD853F 100%);">
+                    <span>🪵</span> Tronzado de un Árbol
+                </div>
+                <div class="card-content">
+                    <div class="feature-item" style="margin-top: 0;">
+                        <div class="feature-icon">✂️</div>
+                        <div>
+                            <strong>Proceso de Tronzado</strong><br>
+                            Consiste en trocear el tronco en partes más pequeñas cuyo tamaño y peso puedan ser movilizados con relativa facilidad.
+                        </div>
+                    </div>
+                    
+                    <div class="pasos-list">
+                        <div class="pasos-title">
+                            <span>🔧</span>
+                            <span>Dirección de Corte</span>
+                        </div>
+                        <div class="element-details">
+                            • Iniciar desde la parte donde se encontraba la copa (más delgada)<br>
+                            • Avanzar hacia la base (más gruesa)<br>
+                            • Cortes transversales a las fibras
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔍</div>
+                        <div>
+                            <strong>Recomendaciones Previas</strong><br>
+                            Antes de empezar los cortes, reconocer bien cómo está apoyado el tronco e identificar las tensiones para evitar que se quede atrapado el espadín.
+                        </div>
+                    </div>
+                    
+                    <div class="tecnica-grid">
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">⛰️</span>
+                                <span>Tronzado en Pendiente</span>
+                            </div>
+                            <div class="element-details">
+                                Situarse en la parte superior del tronco, donde no se puede ser alcanzado por el tronco en caso de que ruede.
+                            </div>
+                        </div>
+                        
+                        <div class="tecnica-item">
+                            <div class="tecnica-title">
+                                <span class="tecnica-icon">⚡</span>
+                                <span>Tronzado con Tensiones</span>
+                            </div>
+                            <div class="element-details">
+                                Procedimiento para cortar troncos con tensiones latentes:
+                            </div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Procedimiento</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Colocarse en lado de tensiones de compresión<br>
+                                    2. Pequeño corte de descarga para romper fibras<br>
+                                    3. Cambiar posición al lado opuesto<br>
+                                    4. Corte final en lado de tensiones de tracción
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Manual de Bomberos del Ayuntamiento de Madrid - Técnicas de Corte y Derribo de Árboles</p>
+            <p>Basado en el documento "16. Arbolado-26-34.pdf"</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Visual del Árbol Viario</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "🌳";
+            position: absolute;
+            font-size: 10rem;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            position: relative;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            padding: 18px 25px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .evaluacion { background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%); }
+        .anatomia { background: linear-gradient(135deg, #614385 0%, #516395 100%); }
+        .defectos { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .partes { background: linear-gradient(135deg, #d31027 0%, #ea384d 100%); }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .feature-item:hover {
+            background: #e9ecef;
+            border-left-color: #2a5298;
+            transform: translateX(5px);
+        }
+        
+        .feature-icon {
+            margin-right: 12px;
+            font-size: 1.4rem;
+            color: #2a5298;
+            min-width: 35px;
+            text-align: center;
+            background: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        
+        .element-list {
+            list-style-type: none;
+            margin-top: 10px;
+        }
+        
+        .element-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+            transition: background 0.3s ease;
+        }
+        
+        .element-list li:hover {
+            background: #f8f9fa;
+        }
+        
+        .element-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .element-icon {
+            margin-right: 12px;
+            color: #2a5298;
+            font-size: 1.2rem;
+            margin-top: 3px;
+            min-width: 30px;
+            text-align: center;
+            background: rgba(42, 82, 152, 0.1);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 25px;
+            background: #1e3c72;
+            color: white;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .footer::before {
+            content: "🏢";
+            position: absolute;
+            font-size: 6rem;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .element-details {
+            font-size: 0.95rem;
+            color: #666;
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+        
+        .highlight {
+            background-color: #fffacd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 2px 0;
+        }
+        
+        .numeric-data {
+            color: #e74c3c;
+            font-weight: bold;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: #ffeaa7;
+            border-left: 5px solid #fdcb6e;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 8px;
+            position: relative;
+            padding-left: 60px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .warning-box::before {
+            content: "⚠️";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.8rem;
+        }
+        
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+        
+        .type-item {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .type-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2c3e50);
+        }
+        
+        .type-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .type-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .card-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 50px 50px 0;
+            border-color: transparent rgba(255,255,255,0.3) transparent transparent;
+            z-index: 1;
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .data-table tr:hover {
+            background: #e9ecef;
+        }
+        
+        .data-table .numeric-cell {
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .type-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-header {
+                font-size: 1.2rem;
+                padding: 15px 20px;
+            }
+            
+            .feature-item {
+                padding: 12px;
+            }
+        }
+        
+        .pulse-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #2ecc71;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        
+        .anatomia-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .anatomia-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid #3498db;
+        }
+        
+        .anatomia-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .anatomia-icon {
+            font-size: 1.5rem;
+            color: #3498db;
+        }
+        
+        .defectos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .defecto-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid #3498db;
+        }
+        
+        .defecto-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .defecto-icon {
+            font-size: 1.5rem;
+            color: #3498db;
+        }
+        
+        .sintomas-list {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .sintomas-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #e74c3c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tree-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .tree-part {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .tree-label {
+            font-weight: bold;
+            margin: 5px 0;
+            padding: 5px 10px;
+            background: #3498db;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .tree-illustration {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            margin: 10px 0;
+        }
+        
+        .partes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .parte-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid #3498db;
+        }
+        
+        .parte-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        
+        .parte-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        @media (max-width: 768px) {
+            .anatomia-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .defectos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .partes-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Evaluación Visual del Árbol Viario</h1>
+            <div class="subtitle">Métodos de diagnóstico, defectos estructurales y anomalías en árboles urbanos</div>
+        </header>
+        
+        <div class="grid-container">
+            <!-- Evaluación Visual del Árbol -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header evaluacion">
+                    <span>🔍</span> Evaluación Visual del Árbol (EVA)
+                </div>
+                <div class="card-content">
+                    <div class="feature-item">
+                        <div class="feature-icon">ℹ️</div>
+                        <div>
+                            <strong>Método de evaluación internacional</strong><br>
+                            Basado en el método VTA (Visual Tree Assessment) adaptado internacionalmente por la ISA (International Society of Arboriculture) y representado en España a través de la Asociación Española de Arboricultura.
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div>
+                            <strong>Objetivo de la evaluación</strong><br>
+                            Valorar visualmente los datos estructurales y biomecánicos de un árbol para determinar, con mejor criterio, la decisión a tomar sobre su manejo o intervención.
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🌱</div>
+                        <div>
+                            <strong>Dos aspectos clave en la salud de un árbol</strong><br>
+                            <strong>Vitalidad:</strong> Capacidad de realizar sus funciones fisiológicas<br>
+                            <strong>Estabilidad:</strong> Capacidad de mantenerse en pie estructuralmente
+                        </div>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <strong>IMPORTANTE</strong><br>
+                        Aunque los signos de vitalidad son básicos para valorar un árbol, si se produce un fallo estructural puede quedar comprometido el futuro inmediato del ejemplar. Un árbol con buena vitalidad pero con defectos estructurales puede convertirse en un peligro potencial.
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📋</div>
+                        <div>
+                            <strong>Tres partes principales en la evaluación</strong><br>
+                            La evaluación visual se divide en tres partes principales que deben examinarse detenidamente:
+                        </div>
+                    </div>
+                    
+                    <div class="partes-container">
+                        <div class="parte-item">
+                            <div class="parte-icon">🌳</div>
+                            <div class="parte-title">Parte Radicular (Raíces)</div>
+                            <div class="element-details">
+                                Sistema de anclaje y absorción de nutrientes. Evaluar daños, pudriciones y estabilidad.
+                            </div>
+                        </div>
+                        
+                        <div class="parte-item">
+                            <div class="parte-icon">🪵</div>
+                            <div class="parte-title">Tronco</div>
+                            <div class="element-details">
+                                Soporte estructural principal. Examinar grietas, inclinaciones, pudriciones y heridas.
+                            </div>
+                        </div>
+                        
+                        <div class="parte-item">
+                            <div class="parte-icon">🌿</div>
+                            <div class="parte-title">Copa</div>
+                            <div class="element-details">
+                                Estructura de ramas y follaje. Evaluar equilibrio, ramas muertas y defectos estructurales.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Anatomía del Árbol -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header anatomia">
+                    <span>🔬</span> Anatomía del Árbol
+                </div>
+                <div class="card-content">
+                    <div class="feature-item">
+                        <div class="feature-icon">🌳</div>
+                        <div>
+                            <strong>Estructura compleja</strong><br>
+                            Un árbol es un ser vivo formado por millones de células vegetales que originan múltiples tejidos especializados. Cada parte del árbol tiene funciones específicas.
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr;">
+                    <div class="anatomia-grid">
+                        <div class="anatomia-item">
+                            <div class="anatomia-title">
+                                <span class="anatomia-icon">🛡️</span>
+                                <span>Corteza</span>
+                            </div>
+                            <div class="element-details">
+                                Protege la parte viva del árbol de parásitos, agentes externos y temperaturas extremas. Es la capa más externa.
+                            </div>
+                        </div>
+                        
+                        <div class="anatomia-item">
+                            <div class="anatomia-title">
+                                <span class="anatomia-icon">💧</span>
+                                <span>Albura</span>
+                            </div>
+                            <div class="element-details">
+                                Parte del tronco más joven que transporta agua hacia las partes superiores. Más húmeda y menos densa que el duramen.
+                            </div>
+                        </div>
+                        
+                        <div class="anatomia-item">
+                            <div class="anatomia-title">
+                                <span class="anatomia-icon">🔄</span>
+                                <span>Médula</span>
+                            </div>
+                            <div class="element-details">
+                                Parte más interna del tronco, formada por células que almacenan nutrientes. Se encuentra en el centro del tronco.
+                            </div>
+                        </div>
+                        
+                        <div class="anatomia-item">
+                            <div class="anatomia-title">
+                                <span class="anatomia-icon">💪</span>
+                                <span>Duramen</span>
+                            </div>
+                            <div class="element-details">
+                                Madera biológicamente inactiva con función de sostén. Estructura más compacta y resistente que proporciona soporte estructural al árbol.
+                            </div>
+                        </div>
+                        
+                        <div class="anatomia-item">
+                            <div class="anatomia-title">
+                                <span class="anatomia-icon">🔄</span>
+                                <span>Cambium</span>
+                            </div>
+                            <div class="element-details">
+                                Capa que sigue a la corteza. Es la parte productiva del árbol que genera nuevos tejidos: hacia el interior forma la madera (xilema) y hacia el exterior forma el floema.
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center;">   
+                        <img src="images/Anatomía.png" alt="" style=" max-width: 100%; max-height: max-content;">
+                    </div>
+                </div>
+            </div>
+            </div>
+            
+            <!-- Defectos y Anomalías Comunes - Versión Revisada -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header defectos">
+                    <span>⚠️</span> Defectos y Anomalías Comunes
+                </div>
+                <div class="card-content">
+                    <div class="feature-item">
+                        <div class="feature-icon">📋</div>
+                        <div>
+                            <strong>Evaluación de defectos estructurales</strong><br>
+                            Los árboles presentan diversas anomalías y defectos que afectan su estabilidad y salud. La identificación correcta de estos problemas es fundamental para determinar el riesgo potencial.
+                        </div>
+                    </div>
+                    
+                    <div class="defectos-grid">
+                        <!-- Raíces Dañadas -->
+                        <div class="defecto-item">
+                            <div class="defecto-title">
+                                <span class="defecto-icon">🌱</span>
+                                <span>Raíces Dañadas</span>
+                            </div>
+                            <div class="element-details">
+                                Los árboles mantienen un equilibrio dinámico entre las ramas vivas y sus raíces. Si se pierden raíces, este equilibrio se deteriora y el árbol puede caer.
+                            </div>
+                            <div class="sintomas-list">
+                                <div class="sintomas-title">
+                                    <span>🔍</span>
+                                    <span>Síntomas y Evaluación</span>
+                                </div>
+                                <div class="element-details">
+                                    • Inclinación excesiva del árbol<br>
+                                    • Partes del suelo levantadas o ahuecadas<br>
+                                    • Grietas vivas en el suelo<br>
+                                    • Raíces expuestas en superficie<br>
+                                    • Pavimento recién colocado cerca del árbol<br>
+                                    • <span class="numeric-data">Más del 40%</span> de raíces dañadas compromete estabilidad
+                                </div>
+                            </div>
+                            <div class="warning-box">
+                                <strong>EXCAVACIONES</strong><br>
+                                Podemos encontrarnos árboles con raíces cortadas por máquinas retroexcavadoras cerca de obras urbanas. Estos daños suponen eliminación de parte del sistema radicular.
+                            </div>
+                        </div>
+                        
+                        <!-- Hongos y Pudrición -->
+                        <div class="defecto-item">
+                            <div class="defecto-title">
+                                <span class="defecto-icon">🍄</span>
+                                <span>Hongos (Pudrición)</span>
+                            </div>
+                            <div class="element-details">
+                                La descomposición de la madera está causada por hongos descomponedores que modifican propiedades mecánicas, físicas y químicas de la madera.
+                            </div>
+                            <div class="sintomas-list">
+                                <div class="sintomas-title">
+                                    <span>🔍</span>
+                                    <span>Síntomas</span>
+                                </div>
+                                <div class="element-details">
+                                    • Cuerpos fructíferos (hongos) en tronco, ramas o raíces<br>
+                                    • Huecos o cavidades en el tronco<br>
+                                    • Gran cantidad de heridas y grietas concentradas<br>
+                                    • Corteza ahuecada<br>
+                                    • Cancros
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">🦠</div>
+                                <div>
+                                    <strong>Grafiosis - Ejemplo específico</strong><br>
+                                    Enfermedad grave que ha disminuido poblaciones de árboles mundialmente. El hongo entra mediante insectos descortezadores (Scolytus scolytus) o por contacto de raíces.
+                                </div>
+                            </div>
+                            <div class="sintomas-list">
+                                <div class="sintomas-title">
+                                    <span>🌿</span>
+                                    <span>Síntomas de Grafiosis</span>
+                                </div>
+                                <div class="element-details">
+                                    • Marchitez y amarilleamiento de hojas<br>
+                                    • Hojas secas<br>
+                                    • Muerte del ejemplar en pocos meses<br>
+                                    • Hongo tapona vasos de savia
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Raíces Estranguladoras -->
+                        <div class="defecto-item">
+                            <div class="defecto-title">
+                                <span class="defecto-icon">🔄</span>
+                                <span>Raíces Estranguladoras</span>
+                            </div>
+                            <div class="element-details">
+                                Las raíces pueden desarrollarse de forma que se estrangulan entre sí o al tronco principal, comprometiendo el flujo de nutrientes y la estabilidad.
+                            </div>
+                            <div class="sintomas-list">
+                                <div class="sintomas-title">
+                                    <span>🔍</span>
+                                    <span>Identificación</span>
+                                </div>
+                                <div class="element-details">
+                                    • Raíces que se enrollan alrededor del tronco en patrón circular o espiral<br>
+                                    • Suelen formarse en árboles que crecen en contenedores consolidados y son trasplantados a los alcorques viarios
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Grietas -->
+                        <div class="defecto-item">
+                            <div class="defecto-title">
+                                <span class="defecto-icon">⚡</span>
+                                <span>Grietas</span>
+                            </div>
+                            <div class="element-details">
+                                Desde el punto de vista biomecánico, las grietas son uno de los defectos más peligrosos en un árbol. Indican alta probabilidad de caída de las partes afectadas.
+                            </div>
+                            <div class="sintomas-list">
+                                <div class="sintomas-title">
+                                    <span>🔍</span>
+                                    <span>Tipos de Grietas</span>
+                                </div>
+                                <div class="element-details">
+                                    • <strong>Grietas verticales profundas:</strong> Fallo en la estructura y supone un riesgo importante para la estabilidad del árbol<br>
+                                    • <strong>Grietas horizontales:</strong> Más peligrosas, perpendiculares a las fibras<br>
+                                    • <strong>Grietas en horquillas:</strong> Sin defensa contra pudrición
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">🎯</div>
+                                <div>
+                                    <strong>Evaluación de grietas</strong><br>
+                                    Las grietas horizontales en el tronco, junto con signos de madera descompuesta, indican problema estructural importante. Suele determinarse tala inmediata.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Troncos Múltiples -->
+                        <div class="defecto-item">
+                            <div class="defecto-title">
+                                <span class="defecto-icon">🌳</span>
+                                <span>Troncos Múltiples ("Corteza Incluida")</span>
+                            </div>
+                            <div class="element-details">
+                                Árboles con dos o más troncos codominantes generan uniones débiles con "corteza incluida" que carece de resistencia estructural.
+                            </div>
+                            <div class="sintomas-list">
+                                <div class="sintomas-title">
+                                    <span>🔍</span>
+                                    <span>Progresión del Defecto</span>
+                                </div>
+                                <div class="element-details">
+                                    • <strong>Fase 1:</strong> Corteza incluida entre troncos<br>
+                                    • <strong>Fase 2:</strong> Árbol más grande, más propenso a romperse<br>
+                                    • <strong>Fase 3:</strong> Rotura y desgaje, situación de riesgo grave
+                                </div>
+                            </div>
+                            <div class="sintomas-list">
+                                <div class="sintomas-title">
+                                    <span>⚠️</span>
+                                    <span>Síntomas de Alerta</span>
+                                </div>
+                                <div class="element-details">
+                                    • Madera descompuesta en zona de falsa unión<br>
+                                    • Humedad en la zona de unión<br>
+                                    • Gran grieta vertical entre troncos<br>
+                                    • Grietas en cancros
+                                </div>
+                            </div>
+                            <div class="warning-box">
+                                <strong>CONSECUENCIA ESTRUCTURAL</strong><br>
+                                Una rama o tronco principal codominante que se ha desgajado es una lesión irreparable. La estructura principal pierde masa y queda muy debilitada.
+                            </div>
+                        </div>
+                        
+                        <!-- Brotaciones Epicórmicas -->
+                        <div class="defecto-item">
+                            <div class="defecto-title">
+                                <span class="defecto-icon">🌿</span>
+                                <span>Brotaciones Epicórmicas</span>
+                            </div>
+                            <div class="element-details">
+                                Después de sufrir una fractura o poda agresiva, algunas especies producen brotaciones procedentes de yemas durmientes. Su unión con el tronco puede ser débil.
+                            </div>
+                            <div class="sintomas-list">
+                                <div class="sintomas-title">
+                                    <span>🔍</span>
+                                    <span>Tipos de Brotaciones Peligrosas</span>
+                                </div>
+                                <div class="element-details">
+                                    • Ramas desde rebrotes no consolidados en poda de rama trasversal<br>
+                                    • Ramas desde pudrición<br>
+                                    • Ramas desde tocón de árbol talado
+                                </div>
+                            </div>
+                            <div class="sintomas-list">
+                                <div class="sintomas-title">
+                                    <span>🎯</span>
+                                    <span>Identificación</span>
+                                </div>
+                                <div class="element-details">
+                                    • Unión débil y poco profunda<br>
+                                    • Corteza de aspecto más joven que el portador<br>
+                                    • Color diferente al del tronco principal<br>
+                                    • Brotes sobre tejidos vivos del árbol
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">⚠️</div>
+                                <div>
+                                    <strong>Riesgo asociado</strong><br>
+                                    Estas brotaciones pueden alcanzar grandes dimensiones pero su unión con el tronco o rama principal puede ser débil y poco profunda, representando riesgo de caída.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📝</div>
+                        <div>
+                            <strong>Consideraciones finales</strong><br>
+                            La casuística de anomalías y defectos en árboles es muy amplia. Habitualmente encontraremos varios de estos problemas presentes al mismo tiempo, requiriendo una evaluación integral del ejemplar.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Manual de Bomberos del Ayuntamiento de Madrid - Evaluación Visual del Árbol Viario</p>
+            <p>Basado en el documento "16. Arbolado.pdf"</p>
+        </div>
+    </div>
+</body>
+</html>

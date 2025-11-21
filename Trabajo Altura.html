@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Técnicas de Trabajo en Altura - Arbolado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #1d976c 0%, #93f9b9 100%);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "🌳";
+            position: absolute;
+            font-size: 10rem;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            position: relative;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            padding: 18px 25px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cabuyeria { background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%); }
+        .nudos { background: linear-gradient(135deg, #614385 0%, #516395 100%); }
+        .cortes { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .escalera { background: linear-gradient(135deg, #d31027 0%, #ea384d 100%); }
+        .autoescala { background: linear-gradient(135deg, #ff5e62 0%, #ff9966 100%); }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .feature-item:hover {
+            background: #e9ecef;
+            border-left-color: #1d976c;
+            transform: translateX(5px);
+        }
+        
+        .feature-icon {
+            margin-right: 12px;
+            font-size: 1.4rem;
+            color: #1d976c;
+            min-width: 35px;
+            text-align: center;
+            background: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        
+        .element-list {
+            list-style-type: none;
+            margin-top: 10px;
+        }
+        
+        .element-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+            transition: background 0.3s ease;
+        }
+        
+        .element-list li:hover {
+            background: #f8f9fa;
+        }
+        
+        .element-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .element-icon {
+            margin-right: 12px;
+            color: #1d976c;
+            font-size: 1.2rem;
+            margin-top: 3px;
+            min-width: 30px;
+            text-align: center;
+            background: rgba(29, 151, 108, 0.1);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 25px;
+            background: #1d976c;
+            color: white;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .footer::before {
+            content: "🏢";
+            position: absolute;
+            font-size: 6rem;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .element-details {
+            font-size: 0.95rem;
+            color: #666;
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+        
+        .highlight {
+            background-color: #fffacd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 2px 0;
+        }
+        
+        .warning-box {
+            background: #ffeaa7;
+            border-left: 5px solid #fdcb6e;
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 8px;
+            position: relative;
+            padding-left: 60px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .warning-box::before {
+            content: "⚠️";
+            position: absolute;
+            left: 10px;
+            top: 40%;
+            transform: translateY(-50%);
+            font-size: 1.8rem;
+        }
+        
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+        
+        .type-item {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 5px solid #1d976c;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .type-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #1d976c, #2c3e50);
+        }
+        
+        .type-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .type-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .card-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 50px 50px 0;
+            border-color: transparent rgba(255,255,255,0.3) transparent transparent;
+            z-index: 1;
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #1d976c 0%, #93f9b9 100%);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .data-table tr:hover {
+            background: #e9ecef;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .type-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-header {
+                font-size: 1.2rem;
+                padding: 15px 20px;
+            }
+            
+            .feature-item {
+                padding: 12px;
+            }
+        }
+        
+        .nudo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 700px) {
+        .nudo-grid {
+            grid-template-columns: 1fr; /* 1 columna */
+        }
+        }
+
+        .nudo-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid #1d976c;
+        }
+        
+        .nudo-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .nudo-icon {
+            font-size: 1.5rem;
+            color: #1d976c;
+        }
+
+        .pasos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+            gap: 10px;
+        }
+        
+        .pasos-list {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #1d976c;
+        }
+        
+        .pasos-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1d976c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .definiciones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .definicion-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #1d976c;
+        }
+        
+        .definicion-termino {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .material-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .material-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid #1d976c;
+        }
+        
+        .material-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #1d976c;
+        }
+        
+        .material-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Técnicas de Trabajo en Altura - Arbolado</h1>
+            <div class="subtitle">Cabuyería, nudos, técnicas de corte y procedimientos de seguridad</div>
+        </header>
+        
+        <div class="grid-container">
+            <!-- Cabuyería -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header cabuyeria">
+                    <span>🪢</span> Cabuyería - Nudos Más Usados en Arbolado
+                </div>
+                <div class="card-content">
+                    <div class="feature-item">
+                        <div class="feature-icon">📚</div>
+                        <div>
+                            <strong>Definición de Cabuyería</strong><br>
+                            Disciplina que estudia el arte de hacer nudos, sus clases y distintas aplicaciones. En arbolado es indispensable para labores de aseguramiento, tiro y descenso controlado de material y ramas.
+                        </div>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <strong>SEGURIDAD EN EL USO DE MATERIAL</strong><br>
+                        Debemos diferenciar claramente el material de seguridad personal del material para movimiento de cargas. Nunca usaremos para levantar cargas material destinado al rescate de víctimas o trabajos en altura para personas.
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔤</div>
+                        <div>
+                            <strong>Definiciones Básicas</strong><br>
+                            Términos fundamentales en cabuyería:
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr;">
+                        <div class="definiciones-grid">
+                            <div class="definicion-item">
+                                <div class="definicion-termino">🔗 Nudo</div>
+                                <div class="element-details">Estructura que se estrecha y cierra de modo que no se pueda abrir por sí sola, sirve para sujetar o amarrar.</div>
+                            </div>
+                            
+                            <div class="definicion-item">
+                                <div class="definicion-termino">🏁 Cabo o Chicote</div>
+                                <div class="element-details">Extremo o terminación de una cuerda.</div>
+                            </div>
+                            
+                            <div class="definicion-item">
+                                <div class="definicion-termino">🌀 Seno</div>
+                                <div class="element-details">Parte central de la cuerda.</div>
+                            </div>
+                            
+                            <div class="definicion-item">
+                                <div class="definicion-termino">➰ Bucle</div>
+                                <div class="element-details">Seno de la cuerda con medio giro. Sirve para sujetar o conectar elementos.</div>
+                            </div>
+                            
+                            <div class="definicion-item">
+                                <div class="definicion-termino">⭕ Gaza</div>
+                                <div class="element-details">Círculo de cuerda que se cierra sobre sí mismo mediante un nudo.</div>
+                            </div>
+                            
+                            <div class="definicion-item">
+                                <div class="definicion-termino">🟦 Firme</div>
+                                <div class="element-details">Parte de la cuerda que no participa en la elaboración del nudo.</div>
+                            </div>
+                            
+                            <div class="definicion-item">
+                                <div class="definicion-termino">🎀 Ligada</div>
+                                <div class="element-details">Sujeción de una o varias cuerdas mediante otra más delgada.</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center;">
+                            <img src="images/Nudo.png" alt="" style="max-width: 100%; max-height: max-content;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nudos para Amarrar Elementos -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header nudos">
+                    <span>🔗</span> Nudos para Amarrar Elementos con Cuerda
+                </div>
+                <div class="card-content">
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div>
+                            <strong>Tipos de Elaboración</strong><br>
+                            Los nudos pueden realizarse de dos maneras: "por seno" (sin usar extremos) o "por chicote" (usando al menos un extremo).
+                        </div>
+                    </div>
+                    
+                    <div class="nudo-grid">
+                        <div class="nudo-item">
+                            <div class="nudo-title">
+                                <span class="nudo-icon">🪝</span>
+                                <span>Ballestrinque</span>
+                            </div>
+                            <div class="element-details">
+                                Para sujetar un cabo a una rama o elemento cilíndrico. Amarre rápido que debe someterse a tensión constante.
+                            </div>
+
+                            <div class="pasos-grid">
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Elaboración por Seno</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Hacer dos bucles similares seguidos<br>
+                                    2. Cruzar el segundo sobre el primero<br>
+                                    3. Introducir objeto en la gaza del nudo<br>
+                                    4. Dar tensión al nudo
+                                </div>
+                            </div>
+
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Elaboración por Chicote</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Damos una vuelta sobre el objeto que se quiere amarrar<br>
+                                    2. El chicote debe pisar el firme<br>
+                                    3. En el mismo sentido, damos otra vuelta con el chicote<br>
+                                    4. Introducimos por dentro del seno que hemos formado al dar esta segunda vuelta<br>
+                                    5. Damos tensión al nudo
+                                </div>
+                            </div>
+                            </div>
+                            <div class="warning-box" style="margin-top: 10px; padding: 12px; padding-left: 50px;">
+                                <strong>PRECAUCIÓN:</strong> No usar si la carga puede girar o sufrir movimientos inesperados.
+                            </div>
+
+                            <div style="display: flex;justify-content: center;">
+                                <img src="images/Ballestrinque.png" alt="" style="max-width: 100%; max-height: max-content;">
+                            </div>
+                        </div>
+
+                        <div class="nudo-item">
+                            <div class="nudo-title">
+                                <span class="nudo-icon">8️⃣</span>
+                                <span>Nudo de Ocho</span>
+                            </div>
+                            <div class="element-details">
+                                Más recomendado como autoseguro. Útil para fijar cuerda y todo tipo de anclajes.
+                            </div>
+
+                            <div class="pasos-grid">
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Elaboración por Seno</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Hacer seno y enrollar los cabos<br>
+                                    2. Hacer bucle como el número ocho<br>
+                                    3. Sacar seno por el primer bucle<br>
+                                    4. Ajustar y tensar
+                                </div>
+                            </div>
+
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Elaboración por Chicote</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Hacemos una gaza con el chicote rodeando el elemento<br>
+                                    2. Reseguimos el nudo de ocho simple de forma inversa<br>
+                                    3. Nuestro chicote terminará paralelo al firme<br>
+                                    4. Ajustar y tensar
+                                </div>
+                            </div>
+                            </div>
+                            <div style="display: flex;justify-content: center; margin-top: 18px;">
+                                <img src="images/Ocho.png" alt="" style="max-width: 100%; max-height: max-content;">
+                            </div>
+                        </div>
+                        
+                        <div class="nudo-item">
+                            <div class="nudo-title">
+                                <span class="nudo-icon">🌳</span>
+                                <span>Nudo de Leñador</span>
+                            </div>
+                            <div class="element-details">
+                                Nudo provisional alrededor de troncos para arrastrar, empujar, subir o bajar. Se estrangula a sí mismo con la tensión.
+                            </div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Elaboración</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Rodear el chicote sobre el firme<br>
+                                    2. Entrar y salir varias veces por el bucle generado<br>
+                                    3. Evitar vueltas sobre el firme
+                                </div>
+                            </div>
+                            <div style="display: flex;justify-content: center; margin-top: 18px;">
+                                <img src="images/Leñador.png" alt="" style="max-width: 100%; max-height: max-content;">
+                            </div>
+                        </div>
+                        
+                        <div class="nudo-item">
+                            <div class="nudo-title">
+                                <span class="nudo-icon">🦅</span>
+                                <span>Nudo de Alondra</span>
+                            </div>
+                            <div class="element-details">
+                                Sujeta la cuerda a un objeto. A más tensión, más aprieta. Útil para colgar pesos o arrastrar troncos.
+                            </div>
+
+                            <div class="pasos-grid">
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Elaboración por Seno</span>
+                                </div>
+                                <div class="element-details">
+                                    Introducimos los dos firmes por el bucle creado al rodear la rama con el seno
+                                </div>
+                            </div>
+
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Elaboración por Chicote</span>
+                                </div>
+                                <div class="element-details">
+                                    1. Rodear el chicote abrazando el tronco<br>
+                                    2. Cruzar el chicote sobre el firme<br>
+                                    3. Rodear nuevamente en sentido inverso saliendo por dentro de la gaza formada
+                                </div>
+                            </div>
+                            </div>
+                            <div style="display: flex;justify-content: center; margin-top: 18px;">
+                                <img src="images/Alondra.png" alt="" style="max-width: 100%; max-height: max-content;">
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Técnica de los Tres Cortes -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header cortes">
+                    <span>✂️</span> Técnica de Saneado en Altura (Los Tres Cortes)
+                </div>
+                <div class="card-content">
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div>
+                            <strong>Objetivo de la Técnica</strong><br>
+                            Evitar que la rama al romperse bascule hacia nosotros o produzca desgarros en ramas principales y tronco, causando más daño al árbol.
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr;">
+                        <div>
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>1️⃣</span>
+                                    <span>Primer Corte - Corte de Alivio</span>
+                                </div>
+                                <div class="element-details">
+                                    • Realizar en parte inferior de la rama<br>
+                                    • Eliminar corteza y romper fibras más superficiales<br>
+                                    • Evita que la rama bascule hacia nosotros al romperse
+                                </div>
+                            </div>
+                            
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>2️⃣</span>
+                                    <span>Segundo Corte - Corte de Separación</span>
+                                </div>
+                                <div class="element-details">
+                                    • Realizar en parte superior<br>
+                                    • Más distal al primer corte<br>
+                                    • Separa la rama del árbol
+                                </div>
+                            </div>
+                            
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>3️⃣</span>
+                                    <span>Tercer Corte - Corte de Acabado</span>
+                                </div>
+                                <div class="element-details">
+                                    • Llamado "corte de acabado"<br>
+                                    • Ni muy cerca ni muy separado del tronco<br>
+                                    • Con inclinación que siga la dirección del agua<br>
+                                    • Favorece la compartimentalización y cicatrización
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: center;">
+                            <img src="images/Tres Cortes.png" alt="" style="max-width: 100%; max-height: max-content;">
+                        </div>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <strong>PRECAUCIÓN</strong><br>
+                        Realizar un solo corte de arriba a abajo causa que la rama se desgarre y bascule hacia nosotros, golpeando la escala o estructura. Es uno de los accidentes más frecuentes en trabajos en altura.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Colocación de Escalera -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header escalera">
+                    <span>🪜</span> Colocación de Escalera para Acceso y Posicionamiento
+                </div>
+                <div class="card-content">
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div>
+                            <strong>Objetivo del Cosido</strong><br>
+                            Realizar un trenzado del árbol con la escalera que proporcione tensión y firmeza al conjunto, soportando movimientos del bombero y del árbol.
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📋</div>
+                        <div>
+                            <strong>Material Necesario</strong><br>
+                            Escalera con longitud suficiente, cuerda auxiliar, cuerda dinámica, dos mosquetones de seguridad, cinta para trabajos en altura, bloqueador y dos arneses integrales.
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; grid-template-columns: 1fr 1fr;">
+                        <div style="min-width: 40%;">
+                            <div class="pasos-list">
+                                <div class="pasos-title">
+                                    <span>🔧</span>
+                                    <span>Procedimiento de Anclaje</span>
+                                </div>
+                                    <div class="element-details">
+                                    <strong>Sistema de Anclaje:</strong><br>
+                                    1. Colocar cinta que pase por los dos largueros (1)<br>
+                                    2. Colocar mosquetón de seguridad en el centro<br>
+                                    3. Pasar cuerda de seguridad para el bombero<br><br>
+                                    
+                                    <strong>Atado de la Escalera:</strong><br>
+                                    4. Hacer nudo de alondra en centro del travesaño (2)<br>
+                                    5. Dar dos vueltas a sobrantes de largueros (3)<br>
+                                    6. Cabos deben salir por parte inferior<br><br>
+                                    
+                                    <strong>Cosido de la Cuerda con el Árbol:</strong><br>
+                                    7. Realizar bucles cruzados en zigzag entre largueros y fuste<br>
+                                    8. Mínimo dos bucles cruzados<br>
+                                    9. Necesario dos compañeros para cruzar cabos en parte trasera<br>
+                                    10. Regresar cabos a largueros (de dentro a afuera)<br><br>
+                                    
+                                    <strong>Nudo de Bloqueo:</strong><br>
+                                    11. Pasar cabo desde dentro hacia afuera (7)<br>
+                                    12. Atar cabo al travesaño correspondiente dando vueltas (8)<br>
+                                    13. Hacer gaza simple dos veces (9)<br><br>
+                                    
+                                    <strong>Nudo de Tensado:</strong><br>
+                                    14. Abrazar con vueltas los dos tramos finales (10-12)<br>
+                                    15. Aplicar tensión entre los dos tramos<br>
+                                    16. Hacer nudo final de gaza (13)<br>
+                                    17. Verificar estabilidad antes de subir
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <img src="images/Escala.png" alt="" style="max-width: 100%; max-height: max-content;">
+                        </div>
+                    </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">👷</div>
+                            <div>
+                                <strong>Procedimiento de Trabajo</strong><br>
+                                Bombero sube asegurado por compañero, una vez arriba se ancla con grillón al árbol mediante anillas laterales del arnés, trabajando siempre coordinado con compañeros en suelo.
+                            </div>
+                        </div>
+                </div>
+            </div>
+            
+            <!-- Trabajo desde Autoescala -->
+            <div class="card full-width">
+                <div class="card-corner"></div>
+                <div class="card-header autoescala">
+                    <span>🚒</span> Acceso y Posicionamiento desde Vehículo Aéreo (Autoescala)
+                </div>
+                <div class="card-content">
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div>
+                            <strong>Ventajas del Trabajo desde Autoescala</strong><br>
+                            Método más seguro para intervenciones en parte alta de árboles (copa) cuando no es posible trabajar completamente desde suelo.
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">⚠️</div>
+                        <div>
+                            <strong>Factores de Seguridad Críticos</strong><br>
+                            Consideraciones esenciales antes de comenzar trabajos desde autoescala:
+                        </div>
+                    </div>
+                    
+                    <div class="type-grid">
+                        <div class="type-item">
+                            <div class="type-title">
+                                <span class="pulse-dot"></span>
+                                Aseguramiento Personal
+                            </div>
+                            <div class="element-details">
+                                Siempre trabajaremos asegurados a la cesta. Un pequeño golpe, hundimiento del terreno o fallo hidráulico puede provocar desplazamiento y sacudida violenta.
+                            </div>
+                        </div>
+                        
+                        <div class="type-item">
+                            <div class="type-title">
+                                <span class="pulse-dot"></span>
+                                Aseguramiento de Herramientas
+                            </div>
+                            <div class="element-details">
+                                La motosierra debe estar asegurada a la cesta. Si se cae, debe quedar suspendida por debajo de la cesta.
+                            </div>
+                        </div>
+                        
+                        <div class="type-item">
+                            <div class="type-title">
+                                <span class="pulse-dot"></span>
+                                Protección de Tráfico
+                            </div>
+                            <div class="element-details">
+                                Proteger la escala en zonas de tráfico. Esperar llegada de policía para regular tráfico si es necesario.
+                            </div>
+                        </div>
+                        
+                        <div class="type-item">
+                            <div class="type-title">
+                                <span class="pulse-dot"></span>
+                                Evaluación de Ramas
+                            </div>
+                            <div class="element-details">
+                                Verificar que ninguna rama golpee o mueva la cesta. Antes de cortar, bajar lapa protectora del órgano de mando.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔌</div>
+                        <div>
+                            <strong>Precauciones Eléctricas</strong><br>
+                            Observar cuidadosamente tendidos eléctricos en zona de trabajo. Mantener distancia de seguridad con cables y ramas.
+                        </div>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <strong>COORDINACIÓN EQUIPO SUELO-CESTA</strong><br>
+                        Nunca retirar ramas caídas en suelo de forma simultánea a tareas de corte desde cesta. El equipo en suelo esperará a que finalice el trabajo en altura antes de recoger ramas.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Manual de Bomberos del Ayuntamiento de Madrid - Técnicas de Trabajo en Altura</p>
+            <p>Basado en el documento "16. Arbolado.pdf"</p>
+        </div>
+    </div>
+</body>
+</html>

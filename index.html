@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intervenciones en Arbolado Urbano</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #fff;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 60px 30px;
+            background: linear-gradient(135deg, rgba(29, 151, 108, 0.9) 0%, rgba(147, 249, 185, 0.8) 100%);
+            color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 219, 226, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 204, 128, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.1) 0%, transparent 50%);
+            z-index: 0;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(133, 132, 132, 0.3);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #e6f7f2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            font-weight: 300;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            z-index: 0;
+            border-radius: 20px;
+        }
+        
+        .card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .card-header {
+            padding: 35px 25px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            min-height: 150px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .card-content {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .motosierra1 { 
+            background: linear-gradient(135deg, rgba(26, 41, 128, 0.8) 0%, rgba(38, 208, 206, 0.8) 100%);
+            box-shadow: 0 10px 20px rgba(26, 41, 128, 0.3);
+        }
+        .motosierra2 { 
+            background: linear-gradient(135deg, rgba(97, 67, 133, 0.8) 0%, rgba(81, 99, 149, 0.8) 100%);
+            box-shadow: 0 10px 20px rgba(97, 67, 133, 0.3);
+        }
+        .epis { 
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.8) 0%, rgba(56, 239, 125, 0.8) 100%);
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+        }
+        .viario { 
+            background: linear-gradient(135deg, rgba(211, 16, 39, 0.8) 0%, rgba(234, 56, 77, 0.8) 100%);
+            box-shadow: 0 10px 20px rgba(211, 16, 39, 0.3);
+        }
+        .corte-suelo { 
+            background: linear-gradient(135deg, rgba(255, 94, 98, 0.8) 0%, rgba(255, 153, 102, 0.8) 100%);
+            box-shadow: 0 10px 20px rgba(255, 94, 98, 0.3);
+        }
+        .altura { 
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.8) 0%, rgba(205, 133, 63, 0.8) 100%);
+            box-shadow: 0 10px 20px rgba(139, 69, 19, 0.3);
+        }
+        
+        .card-corner {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 80px 80px 0;
+            border-color: transparent rgba(255,255,255,0.2) transparent transparent;
+            z-index: 1;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+        
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px;
+            background: rgba(29, 151, 108, 0.2);
+            color: white;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(29, 151, 108, 0.3) 0%, transparent 70%);
+            z-index: 0;
+        }
+        
+        .footer p {
+            position: relative;
+            z-index: 1;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.8rem;
+            }
+            
+            .card-header {
+                font-size: 1.5rem;
+                padding: 25px 20px;
+            }
+        }
+        
+        .icon-large {
+            font-size: 3.5rem;
+            filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
+        }
+        
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float linear infinite;
+        }
+        
+        @keyframes float {
+            to {
+                transform: translateY(-1000px) rotate(360deg);
+            }
+        }
+        
+        .glow {
+            box-shadow: 0 0 20px rgba(29, 151, 108, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <header class="floating">
+            <h1>Intervenciones en Arbolado Urbano</h1>
+            <div class="subtitle">Manual de Procedimientos para Bomberos</div>
+        </header>
+        
+        <div class="grid-container">
+            <!-- Motosierra I -->
+            <div class="card pulse">
+                <div class="card-corner"></div>
+                <div class="card-header motosierra1">
+                    <span class="icon-large">🔧</span> Motosierra I
+                </div>
+                <div class="card-content">
+                    <a href="Motosierra.html" class="btn"><span style="color: rgb(82, 81, 81);">Acceder</span></a>
+                </div>
+            </div>
+            
+            <!-- Motosierra II -->
+            <div class="card pulse">
+                <div class="card-corner"></div>
+                <div class="card-header motosierra2">
+                    <span class="icon-large">🪚</span> Motosierra II
+                </div>
+                <div class="card-content">
+                    <a href="Motosierras 2.html" class="btn"><span style="color: rgb(82, 81, 81);">Acceder</span></a>
+                </div>
+            </div>
+            
+            <!-- EPIs y Seguridad -->
+            <div class="card pulse">
+                <div class="card-corner"></div>
+                <div class="card-header epis">
+                    <span class="icon-large">🛡️</span> EPIs y Seguridad
+                </div>
+                <div class="card-content">
+                    <a href="EPIs y Seguridad.html" class="btn"><span style="color: rgb(82, 81, 81);">Acceder</span></a>
+                </div>
+            </div>
+            
+            <!-- Árbol Viario -->
+            <div class="card pulse">
+                <div class="card-corner"></div>
+                <div class="card-header viario">
+                    <span class="icon-large">🛣️</span> Árbol Viario
+                </div>
+                <div class="card-content">
+                    <a href="Arbol viario.html" class="btn"><span style="color: rgb(82, 81, 81);">Acceder</span></a>
+                </div>
+            </div>
+            
+            <!-- Técnicas de Corte en Suelo -->
+            <div class="card pulse">
+                <div class="card-corner"></div>
+                <div class="card-header corte-suelo">
+                    <span class="icon-large">🌲</span> Técnicas de Corte en Suelo
+                </div>
+                <div class="card-content">
+                    <a href="Tecnicas de Corte.html" class="btn"><span style="color: rgb(82, 81, 81);">Acceder</span></a>
+                </div>
+            </div>
+            
+            <!-- Trabajo en Altura -->
+            <div class="card pulse">
+                <div class="card-corner"></div>
+                <div class="card-header altura">
+                    <span class="icon-large">🪜</span> Trabajo en Altura
+                </div>
+                <div class="card-content">
+                    <a href="Trabajo Altura.html" class="btn"><span style="color: rgb(82, 81, 81);">Acceder</span></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Manual de Bomberos del Ayuntamiento de Madrid</p>
+        </div>
+    </div>
+
+    <script>
+        // Crear partículas flotantes
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Tamaño aleatorio
+                const size = Math.random() * 5 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Posición inicial aleatoria
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Opacidad aleatoria
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                
+                // Duración de animación aleatoria
+                const duration = Math.random() * 20 + 10;
+                particle.style.animationDuration = `${duration}s`;
+                
+                // Retraso aleatorio
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+            
+            // Efecto de brillo aleatorio en las tarjetas
+            const cards = document.querySelectorAll('.card');
+            setInterval(() => {
+                const randomCard = cards[Math.floor(Math.random() * cards.length)];
+                randomCard.classList.add('glow');
+                setTimeout(() => {
+                    randomCard.classList.remove('glow');
+                }, 1000);
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
