@@ -178,6 +178,7 @@
             width: 30px;
             height: 30px;
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: center;
         }
@@ -422,6 +423,7 @@
             padding: 8px 0;
             border-bottom: 1px dashed #ddd;
             display: flex;
+            flex-wrap: wrap;
             align-items: flex-start;
         }
         
@@ -621,36 +623,36 @@
                         </div>
                     </div>
                     
-                    <div class="type-grid" style=" display: flex; margin-bottom: 18px;">
-                        <div class="type-item" style="flex: 1;">
+                    <div class="type-grid" style=" display: flex; flex-wrap: wrap; gap: 18px;">
+                        <div class="type-item" style="flex: 1 1 250px;">
                             <div class="type-title"><span>🦷</span> Diente Cortante</div>
                             <div class="element-details">
                                 Dependiendo de la dureza de la madera a cortar elegiremos la forma de estos dientes: diente redondo, semiredondo o cuadrado.
                             </div>
                         </div>
                         
-                        <div class="type-item" style="flex: 1;">
+                        <div class="type-item" style="flex: 1 1 250px;">
                             <div class="type-title"><span>🎚️</span>Talón de Profundidad</div>
                             <div class="element-details">
                                 Marca distancia entre parte superior del limitador de profundidad (andarín) y arista del filo del diente de corte. Determina profundidad de penetración del diente de corte en madera y el grosor de virutas.
                             </div>
                         </div>
                         
-                        <div class="type-item"style="flex: 1;">
+                        <div class="type-item"style="flex: 1 1 250px;">
                             <div class="type-title"><span>⚙️</span>Eslabón Motriz</div>
                             <div class="element-details">
                                 Va por dentro del carril del espadín. Se distingue por su forma de aleta de tiburón. A su espesor se le denomina “galga”.
                             </div>
                         </div>
 
-                         <div class="type-item"style="flex: 1;">
+                         <div class="type-item"style="flex: 1 1 250px;">
                             <div class="type-title"><span>🔗</span>Paso de Cadena</div>
                             <div class="element-details">
                                 Es la distancia que hay entre 3 remaches consecutivos, desde el diente de corte al eslabón de unión. 
                             </div>
                         </div>
 
-                         <div class="type-item"style="flex: 1;">
+                         <div class="type-item"style="flex: 1 1 250px;">
                             <div class="type-title"><span>🔩</span>Remache</div>
                             <div class="element-details">
                                 Es el encargado de engarzar los eslabones.
@@ -1376,7 +1378,7 @@
         }
 
         .alinear {
-            grid-column: 1 / -1;
+        grid-column: 1 / -1;
            display: flex;
            gap: 20px;
            justify-content: center;
