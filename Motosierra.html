@@ -16,13 +16,12 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: #333;
             line-height: 1.6;
-            padding: 20px;
-            min-height: 100vh;
+            margin: 0;
         }
         
         .container {
             max-width: 1600px;
-            margin: 0 auto;
+            margin: 0;
         }
         
         header {
@@ -385,15 +384,15 @@
         }
 
         #viewport {
-            width: 100vw;
-            height: 100vh;
-            overflow-y: scroll;
+            width: 100%;
+            min-height: 100vh;
+            overflow-y: auto;
             overflow-x: hidden;
         }
 
         #app-wrapper {
             width: 1600px;
-            margin: 0 auto;          /* 👈 el centrado VA AQUÍ */
+            margin: 0 auto;
         }
 
         #app {
