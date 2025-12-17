@@ -16,12 +16,13 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: #333;
             line-height: 1.6;
-            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
         }
         
         .container {
             max-width: 1600px;
-            margin: 0;
+            margin: 0 auto;
         }
         
         header {
@@ -360,6 +361,28 @@
             font-weight: bold;
         }
         
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .type-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-header {
+                font-size: 1.2rem;
+                padding: 15px 20px;
+            }
+            
+            .feature-item {
+                padding: 12px;
+            }
+        }
         
         .pulse-dot {
             display: inline-block;
@@ -380,23 +403,20 @@
         html, body {
             width: 100%;
             height: 100%;
-            margin: 0;
+            overflow: auto;
         }
 
         #viewport {
-            width: 100%;
-            min-height: 100vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        #app-wrapper {
-            width: 1600px;
-            margin: 0 auto;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
         }
 
         #app {
             width: 1600px;
+            height: auto;
             transform-origin: top center;
         }
 
@@ -404,7 +424,6 @@
 </head>
 <body>
     <div id="viewport">
-    <div id="app-wrapper">
     <div id="app">
     <div class="container">
         <header>
@@ -804,20 +823,18 @@
     </div>
     </div>
     </div>
-    </div>
 
     <script>
     function scaleApp() {
         const baseWidth = 1600;
-        const maxScale = 1;
+        
 
-        const scale = Math.min(
-            window.innerWidth / baseWidth,
-            maxScale
-        );
+        const scaleX = window.innerWidth / baseWidth;
+        const scaleY = window.innerHeight / baseHeight;
+        const scale = Math.min(scaleX, scaleY);
 
-        document.getElementById("app").style.transform =
-            `scale(${scale})`;
+        const app = document.getElementById("app");
+        app.style.transform = `scale(${scale})`;
     }
 
     window.addEventListener("resize", scaleApp);
