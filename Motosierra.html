@@ -387,20 +387,25 @@
         #viewport {
             width: 100vw;
             height: 100vh;
-            overflow-y: auto;
+            overflow-y: scroll;
             overflow-x: hidden;
-            display: flex;
-            justify-content: center;
+        }
+
+        #app-wrapper {
+            width: 1600px;
+            margin: 0 auto;          /* 👈 el centrado VA AQUÍ */
         }
 
         #app {
             width: 1600px;
             transform-origin: top center;
         }
+
     </style>
 </head>
 <body>
     <div id="viewport">
+    <div id="app-wrapper">
     <div id="app">
     <div class="container">
         <header>
@@ -800,14 +805,20 @@
     </div>
     </div>
     </div>
+    </div>
 
     <script>
     function scaleApp() {
         const baseWidth = 1600;
-        const scale = window.innerWidth / baseWidth;
+        const maxScale = 1;
 
-        const app = document.getElementById("app");
-        app.style.transform = `scale(${scale})`;
+        const scale = Math.min(
+            window.innerWidth / baseWidth,
+            maxScale
+        );
+
+        document.getElementById("app").style.transform =
+            `scale(${scale})`;
     }
 
     window.addEventListener("resize", scaleApp);
